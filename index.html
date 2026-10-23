@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lenium Trader Toolkit · payout calculator + evaluation tracker</title>
+<meta name="description" content="Free fan-made tools for Lenium traders: a payout calculator for YES/NO contracts (with Lenium's simulated exchange fee) and an evaluation tracker for your profit target, floor and 30-day window. Not official.">
+<meta name="theme-color" content="#0f1222">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lenium Trader Toolkit">
+<meta property="og:description" content="Payout calculator + evaluation tracker for Lenium traders. Fan-made, not official.">
+<meta property="og:image" content="og.jpg?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Lenium Trader Toolkit: payout calculator and evaluation tracker">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lenium Trader Toolkit">
+<meta name="twitter:description" content="Payout calculator + evaluation tracker for Lenium traders. Fan-made, not official.">
+<meta name="twitter:image" content="og.jpg?v=1">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="assets/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="https://www.lenium.capital/" target="_blank" rel="noopener" aria-label="Lenium">
+    <img src="assets/mark.png" alt="" width="32" height="32">
+    <img src="assets/word.png" alt="Lenium" class="word" height="22">
+  </a>
+  <span class="tag">Trader Toolkit</span>
+</header>
+
+<main class="wrap">
+  <p class="eyebrow">Fan-made · not official</p>
+  <h1>Know the math <span class="accent">before you trade.</span></h1>
+  <p class="lede">Two free tools for Lenium traders: what a YES/NO trade pays, and where your evaluation stands.</p>
+
+  <div class="tabs" role="tablist" aria-label="Tools">
+    <button class="tab" role="tab" id="tab-calc" aria-controls="calc" aria-selected="true" type="button">Payout calculator</button>
+    <button class="tab" role="tab" id="tab-track" aria-controls="track" aria-selected="false" type="button">Evaluation tracker</button>
+  </div>
+
+  <!-- ============ TOOL 1: PAYOUT CALCULATOR ============ -->
+  <section class="tool" id="calc" role="tabpanel" aria-labelledby="tab-calc">
+    <div class="panel">
+      <h2>Payout calculator <span class="ex" id="exTag">Example</span></h2>
+      <p class="muted">Every contract pays $1 if it's right and $0 if it's wrong. Pre-filled with an example: YES at 48¢, $100.</p>
+      <div class="field">
+        <span class="flabel">Side</span>
+        <div class="sides">
+          <button class="side-btn yes" id="sideYes" type="button" aria-pressed="true">YES</button>
+          <button class="side-btn no" id="sideNo" type="button" aria-pressed="false">NO</button>
+        </div>
+      </div>
+      <div class="two">
+        <div class="field">
+          <label for="price">Price</label>
+          <div class="inp"><input id="price" type="number" inputmode="numeric" min="1" max="99" step="1" value="48"><span class="suf">¢</span></div>
+        </div>
+        <div class="field">
+          <label for="stake">Stake</label>
+          <div class="inp"><span class="pre">$</span><input id="stake" type="number" inputmode="decimal" min="1" step="1" value="100"></div>
+        </div>
+      </div>
+      <input type="range" id="priceRange" min="1" max="99" step="1" value="48" aria-label="Price in cents">
+      <label class="check"><input type="checkbox" id="feeOn" checked><span>Include the simulated exchange fee<small>Lenium charges a standard taker fee on every fill: 0.07 × contracts × price × (1 − price), rounded up to the next cent.</small></span></label>
+    </div>
+
+    <div class="panel" aria-live="polite">
+      <div class="res">
+        <div class="stat"><div class="k">Implied probability</div><div class="v b" id="oProb">48%</div><div class="s" id="oProbS">the market's price for YES</div></div>
+        <div class="stat"><div class="k">Contracts</div><div class="v" id="oCts">208</div><div class="s" id="oCtsS">whole contracts</div></div>
+        <div class="stat"><div class="k">Payout if right</div><div class="v g" id="oPay">$208.00</div><div class="s">$1 per contract</div></div>
+        <div class="stat"><div class="k">Profit if right</div><div class="v g" id="oProfit">+$106.43</div><div class="s" id="oRet">+104% return</div></div>
+        <div class="stat"><div class="k">Loss if wrong</div><div class="v r" id="oLoss">−$101.57</div><div class="s" id="oLossS">your whole stake</div></div>
+        <div class="stat"><div class="k">Fee</div><div class="v" id="oFee">$1.82</div><div class="s" id="oFeeS">on this order</div></div>
+      </div>
+      <div class="be" id="oBE">To break even you need to be right more than <b>48.8%</b> of the time.</div>
+      <div class="note" id="bandNote" hidden></div>
+      <details>
+        <summary>How it's calculated</summary>
+        <div class="formula" id="formula"></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ TOOL 2: EVALUATION TRACKER ============ -->
+  <section class="tool" id="track" role="tabpanel" aria-labelledby="tab-track" hidden>
+    <div class="panel">
+      <h2>Evaluation tracker</h2>
+      <p class="muted">Pick your Lenium evaluation account and see your target, floor and window in dollars.</p>
+      <div class="field">
+        <span class="flabel">Account size</span>
+        <div class="chips" id="sizes"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="dblTime"><span>Double Time add-on<small>30 → 60 days to pass</small></span></label>
+      <label class="check"><input type="checkbox" id="consBoost"><span>Consistency boost add-on<small>Consistency limit 15% → 25%</small></span></label>
+      <div class="rules" id="rules"></div>
+      <p class="asof">Rules as read from lenium.capital on Oct 23, 2026. Lenium's <a href="https://www.lenium.capital/rules" target="_blank" rel="noopener">Rules page</a> is the final word.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Your progress <span class="muted" style="font:500 14px var(--sans)">(optional)</span></h2>
+      <div class="two">
+        <div class="field">
+          <label for="bal">Current balance</label>
+          <div class="inp"><span class="pre">$</span><input id="bal" type="number" inputmode="decimal" min="0" step="0.01" placeholder="25000"></div>
+        </div>
+        <div class="field">
+          <label for="day">Day</label>
+          <div class="inp"><input id="day" type="number" inputmode="numeric" min="1" max="60" step="1" placeholder="1"><span class="suf" id="dayOf">of 30</span></div>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:8px">Use your equity: cash plus open positions at their current price. Lenium's drawdown guide says the account ends once equity touches or drops below the floor.</p>
+      <div id="prog" hidden>
+        <div class="bar" id="bar"><i id="barFill"></i></div>
+        <div class="barlab"><span id="barL">$0 profit</span><span id="barR">target $2,500</span></div>
+        <div class="res" style="margin-top:12px">
+          <div class="stat"><div class="k">Profit so far</div><div class="v" id="tProfit">$0</div><div class="s" id="tProfitS">0% of the account</div></div>
+          <div class="stat"><div class="k">Still to target</div><div class="v b" id="tToGo">$2,500</div><div class="s" id="tToGoS">100% of the target left</div></div>
+          <div class="stat"><div class="k">Room above floor</div><div class="v" id="tRoom">$2,500</div><div class="s" id="tRoomS">10% of your balance</div></div>
+          <div class="stat"><div class="k">Days left</div><div class="v" id="tDays">–</div><div class="s" id="tDaysS">enter your day</div></div>
+        </div>
+        <div class="status ok" id="status"><span class="dot"></span><div><span id="stTxt">On track</span><small id="stSub"></small></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="sharePanel" hidden>
+      <h2>Share my progress</h2>
+      <p class="muted">A card with your account, progress and status. Add your X handle if you like.</p>
+      <div class="field">
+        <label for="handle">X handle (optional)</label>
+        <div class="inp handle-inp"><span class="pre">@</span><input id="handle" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="15" placeholder="yourhandle"></div>
+      </div>
+      <div class="canvas-frame"><canvas id="card" width="1200" height="675" role="img" aria-label="Your Lenium evaluation progress card"></canvas></div>
+      <div class="actions">
+        <button class="btn btn-primary" id="btnDownload" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 19h16"/></svg>Download PNG</button>
+        <button class="btn btn-x" id="btnShareX" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" class="fill"><path d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3zm-1.08 16.17h1.7L7.4 4.73H5.58l11.09 14.44z"/></svg>Share on X</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Fan-made · Lenium accounts are simulated evaluation accounts · <a href="https://www.lenium.capital/" target="_blank" rel="noopener">lenium.capital</a></p>
+  <p>made by <a href="https://x.com/iamlogtun" target="_blank" rel="noopener">@iamlogtun</a> · not official</p>
+</footer>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-x" id="modalClose" type="button" aria-label="Close">×</button>
+    <h3 id="modalTitle">Save your card</h3>
+    <p class="muted" id="modalSteps">Press and hold the image, then tap <strong>Save to Photos</strong>.</p>
+    <img id="modalImg" alt="Your Lenium evaluation progress card">
+    <a class="btn btn-x" id="modalOpenX" href="https://x.com/intent/tweet" target="_blank" rel="noopener" hidden>Open X →</a>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="app.js?v=1" defer></script>
+</body>
+</html>
